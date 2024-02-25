@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>思考时的动态圆形</title>
+  <style>
+    body {
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .circle {
+      width: 150px;
+      height: 150px;
+      background-color: white;
+      animation: rotate 2s linear infinite;
+    }
+    
+    @keyframes rotate {
+      0% {
+        border-radius: 50%;
+        transform: rotate(0deg);
+      }
+      50% {
+        border-radius: 30%;
+        transform: rotate(180deg);
+      }
+      100% {
+        border-radius: 70%;
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="circle"></div>
+</body>
+</html>

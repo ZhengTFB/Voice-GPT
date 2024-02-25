@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>声音可视化</title>
+  <style>
+    body {
+      background-color: black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="visualizer" width="400" height="400"></canvas>
+  
+  <script>
+    const canvas = document.getElementById('visualizer');
+    const ctx = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        const audioContext = new AudioContext();
+        const analyser = audioContext.createAnalyser();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        
+        microphone.connect(analyser);
+        
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        const initialRadius = 50; // 设置初始半径
+        const scalingFactor = 0.9; // 设置缩放因子
+        
+        function draw() {
+          analyser.getByteFrequencyData(dataArray);
+          
+          const average = dataArray.reduce((acc, val) => acc + val) / bufferLength;
+          const radius = initialRadius + average * scalingFactor;
+          
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.beginPath();
+          ctx.arc(canvas.width / 2, canvas.height / 2, radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'white';
+          ctx.fill();
+          
+          requestAnimationFrame(draw);
+        }
+        
+        draw();
+      })
+      .catch(err => {
+        console.error('无法获取麦克风输入：', err);
+      });
+  </script>
+</body>
+</html>

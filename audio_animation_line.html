@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>声音可视化</title>
+  <style>
+    body {
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .rectangle {
+      width: 100px;
+      height: 150px;
+      background-color: white;
+      border-radius: 50px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="rectangle" id="rect1"></div>
+  <div class="rectangle" id="rect2"></div>
+  <div class="rectangle" id="rect3"></div>
+  <div class="rectangle" id="rect4"></div>
+  
+  <audio id="audio" src="audio.mp3"></audio>
+  
+  <script>
+    const rectangles = document.querySelectorAll('.rectangle');
+    let audioContext;
+    let analyser;
+    
+    const frequencies = [
+      [0, 20],   // 频段1
+      [21, 50],  // 频段2
+      [51, 100], // 频段3
+      [101, 255] // 频段4
+    ];
+    
+    function startAudioContext() {
+      audioContext = new AudioContext();
+      analyser = audioContext.createAnalyser();
+      
+      const audioElement = document.getElementById('audio');
+      const source = audioContext.createMediaElementSource(audioElement);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+      
+      function draw() {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        analyser.getByteFrequencyData(dataArray);
+        
+        frequencies.forEach((range, index) => {
+          const [start, end] = range;
+          
+          let sum = 0;
+          for (let i = start; i <= end; i++) {
+            sum += dataArray[i];
+          }
+          const average = sum / (end - start + 1);
+          
+          const height = average * 0.5 + 50; // 初始值50，变化幅度减小
+          rectangles[index].style.height = height + 'px';
+        });
+        
+        requestAnimationFrame(draw);
+      }
+      
+      draw();
+    }
+    
+    document.addEventListener('click', () => {
+      if (!audioContext) {
+        startAudioContext();
+        document.getElementById('audio').play();
+      }
+    });
+  </script>
+</body>
+</html>
